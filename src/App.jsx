@@ -1,9 +1,8 @@
 import React from "react";
 import "./App.css";
-import { Stage, Layer, Line, Text, Rect, Circle } from "react-konva";
-import Konva from "konva";
+import { Stage, Layer, Text} from "react-konva";
 import * as Tone from "tone";
-import cursor from "/cursor.png"
+
 
 const ogScriblinLifeMessages = [
   "you don't have time",
@@ -39,22 +38,15 @@ const messageSets = {
 
 const App = () => {
 
-   const START_WIDTH = 1520;
-  const START_HEIGHT = 600;
+  const width = 640;
+  const height = 160;
 
   const [started, setStarted] = React.useState(false);
-  const [lines, setLines] = React.useState([]);
   const [revealed, setRevealed] = React.useState(false);
   const [msgNumber, setMsgNumber] = React.useState(0);
   const [selectedMessages, setSelectedMessages] = React.useState(ogScriblinLifeMessages);
   const [selectedSetName, setSelectedSetName] = React.useState("ogScriblinLifeMessages by somebodyouknow");
-  const [stageSize, setStageSize] = React.useState({
 
-    width: START_WIDTH,
-    height: START_HEIGHT,
-    scale: 1,
-
-  })
 
   const isDrawing = React.useRef(false);
   const coatLayer = React.useRef(null);
@@ -68,13 +60,6 @@ const App = () => {
   const musicRef = React.useRef(null);
 
 
-  const moonRef = React.useRef(null);
-
-  const FIREFLIES_NUM = 20;
-  const fireflyRef = React.useRef(null);
-  const fireflyNodes = React.useRef([]);
-
-  const cursorRef = React.useRef(null);
 
   const checkShown = () => {
     const layer = coatLayer.current;
@@ -117,75 +102,9 @@ const App = () => {
     };
   }, []);
 
-  // moon animation
-  React.useEffect(() => {
-    const animation = new Konva.Animation((frame) => {
-      if (!moonRef.current) return;
-
-      //glow, forgive me but i am bad at math so i used ai here
-      const glow = 15 + Math.sin(frame.time / 500) * 10;
-      moonRef.current.shadowBlur(glow);
-      moonRef.current.opacity(0.7 + Math.sin(frame.time / 700) * 0.3);
-    }, moonRef.current?.getLayer());
-    animation.start();
-    return () => animation.stop();
-  }, []);
-
-  // fireflies animation
-  React.useEffect(() => {
-    const animation = new Konva.Animation((frame) => {
-      fireflyNodes.current.forEach((node, i) => {
-        if (!node) return;
-        const t = frame.time / 2000 + i * 5; // offset each firefly so they don't move in sync
-        const x =
-          stageSize.width / 2 +
-          Math.sin(t * 0.3) * (stageSize.width / 2.5) +
-          Math.sin(t * 1.7) * 40;
-        const y =
-          stageSize.height / 2 +
-          Math.cos(t * 0.4) * (stageSize.height / 2.5) +
-          Math.cos(t * 2.1) * 30;
-        node.x(x);
-        node.y(y);
-        node.opacity(0.4 + Math.abs(Math.sin(t * 2)) * 0.6);
-      });
-    }, fireflyRef.current);
-    animation.start();
-    return () => animation.stop();
-  }, [stageSize]);
-
-  React.useEffect(() => {
-    const updateSize = () => {
-      const padding = 10;
-      const availableWidth = window.innerWidth - padding;
-      const availableHeight = window.innerHeight - padding;
-      const scale = Math.min (
-        availableWidth / START_WIDTH,
-        availableHeight / START_HEIGHT
-      );
-      setStageSize({
-        width: START_WIDTH * scale,
-        height: START_HEIGHT * scale,
-        scale,
-      });
-    };
-
-   updateSize();
-   window.addEventListener("resize", updateSize);
-   return () => window.removeEventListener("resize", updateSize); 
-  }, []);
 
 
-  React.useEffect(() => {
-    const cursorEl = cursorRef.current;
-    const moveCursor = (e) => {
-      if (cursorEl) {
-        cursorEl.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-      }
-    };
-    window.addEventListener("mousemove", moveCursor);
-    return () => window.removeEventListener("mousemove", moveCursor)
-  }, []);
+
 
   const handleMouseDown = async (e) => {
     if (!soundStarted.current) {
@@ -200,9 +119,8 @@ const App = () => {
 
     isDrawing.current = true;
     const pos = e.target.getStage().getPointerPosition();
-    setLines((prev) => [...prev, [pos.x, pos.y]]);
+  
     if (!pos) return;
-
 
     clearTimeout(drawTimeoutRef.current);
     drawTimeoutRef.current = setTimeout(() => {
@@ -216,14 +134,6 @@ const App = () => {
     if (!isDrawing.current) return;
     const pos = e.target.getStage().getPointerPosition();
     if (!pos) return;
-    setLines((prev) => {
-      const newLines = [...prev];
-      newLines[newLines.length - 1] = newLines[newLines.length - 1].concat([
-        pos.x,
-        pos.y,
-      ]);
-      return newLines;
-    });
     const freq = 300 + Math.random() * 800;
     filterRef.current.frequency.rampTo(freq, 0.03);
     noiseRef.current.volume.rampTo(-30, 0.3);
@@ -237,7 +147,6 @@ const App = () => {
   };
 
   const nextMessage = () => {
-    setLines([]);
     setRevealed(false);
     setMsgNumber((i) => (i + 1) % selectedMessages.length);
   };
@@ -246,12 +155,6 @@ const App = () => {
   return (
     <>
 
-      <img 
-        ref={cursorRef}
-        src={cursor}
-        className="eraserCursor"
-        alt=""
-        />
 
        
 {!started ? (
@@ -273,7 +176,6 @@ const App = () => {
           setSelectedSetName(e.target.value);
           setSelectedMessages(messageSets[e.target.value]);
           setMsgNumber(0);
-          setLines([]);
           setRevealed(false);
         }}
         >
@@ -287,10 +189,8 @@ const App = () => {
 
         <div className="stage-container">
       <Stage
-        width={stageSize.width}
-        height={stageSize.height}
-        scaleX={stageSize.scale}
-        scaleY={stageSize.scale}
+        width={width}
+        height={height}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -299,69 +199,17 @@ const App = () => {
           <Text
             text={selectedMessages[msgNumber]}
             x={0}
-            y={300}
-            width={stageSize.width}
+            y={40}
+            width={width}
             align="center"
-            fontSize={60}
+            fontSize={26}
             fontFamily="Mansalva"
             fill="white"
             top="-50px"
           />
         </Layer>
 
-        <Layer className="containerScribble" ref={coatLayer}>
-          <Rect x={0} y={0} width={stageSize.width} height={stageSize.height} fill="black" />
-          {lines.map((points, i) => (
-            <Line
-              key={i}
-              points={points}
-              stroke="white"
-              strokeWidth={15}
-              lineCap="round"
-              lineJoin="round"
-              globalCompositeOperation="destination-out"
-            />
-          ))}
-        </Layer>
-
-        <Layer>
-          <Circle
-            ref={moonRef}
-            x={100}
-            y={50}
-            radius={30}
-            fillRadialGradientStartPoint={{ x: -15, y: -15 }}
-            fillRadialGradientStartRadius={0}
-            fillRadialGradientEndPoint={{ x: 0, y: 0 }}
-            fillRadialGradientEndRadius={50}
-            fillRadialGradientColorStops={[
-              0,
-              "#fbfaf7",
-              0.5,
-              "#c1bcaed8",
-              1,
-              "#ffffff",
-            ]}
-            shadowColor="#f5f3e7"
-            shadowBlur={20}
-            shadowOpacity={1}
-          />
-        </Layer>
-
-        <Layer>
-          {Array.from({length: FIREFLIES_NUM}).map((_, i) => (
-            <Circle 
-              key={i}
-              ref={(node) => (fireflyNodes.current[i] = node)}
-              radius={2}
-              fill="#fddba4"
-              shadowColor="#fddba3"
-              shadowBlur={8}
-              shadowOpacity={1}
-              />
-          ))}
-        </Layer>
-      </Stage>
+   </ Stage>
 
       {revealed && <button className="next" onClick={nextMessage}>→</button>}
     </div>
