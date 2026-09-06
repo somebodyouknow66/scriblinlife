@@ -1,7 +1,8 @@
 import React from "react";
 import "./App.css";
-import { Stage, Layer, Text, Line} from "react-konva";
+import { Stage, Layer, Text, Line, Circle} from "react-konva";
 import {Image as KonvaImage} from "react-konva"
+import Konva from "konva"
 import useImage from "use-image";
 import * as Tone from "tone";
 
@@ -62,7 +63,11 @@ const App = () => {
   const soundStarted = React.useRef(null);
   const musicRef = React.useRef(null);
 
+  const FIREFLIES_NUM = 30;
+  const fireflyRef = React.useRef(null);
+  const fireflyNodes = React.useRef([]);
 
+  const [bgSize, setBgSize] = React.useState({ width: window.innerWidth, height: window.innerHeight})
 
   const checkShown = () => {
     const layer = coatLayer.current;
@@ -105,8 +110,28 @@ const App = () => {
     };
   }, []);
 
-
-
+// fireflies
+React.useEffect(() => {
+  const animation = new Konva.Animation((frame) => {
+    fireflyNodes.current.forEach((node, i) => {
+      if (!node) return;
+      const t = frame.time / 2000 + i * 5;
+      const x =
+        bgSize.width / 2 +
+        Math.sin(t * 0.3) * (bgSize.width / 2.5) +
+        Math.sin(t * 1.7) * 40;
+      const y =
+        bgSize.height / 2 +
+        Math.cos(t * 0.4) * (bgSize.height / 2.5) +
+        Math.cos(t * 2.1) * 30;
+      node.x(x);
+      node.y(y);
+      node.opacity(0.4 + Math.abs(Math.sin(t * 2)) * 0.6);
+    });
+  }, fireflyRef.current);
+  animation.start();
+  return () => animation.stop();
+}, [bgSize]);
 
 
   const handleMouseDown = async (e) => {
@@ -236,7 +261,7 @@ const App = () => {
             height={height}
             align="center"
             verticalAlign="middle"
-            fontSize={26}
+            fontSize={34}
             fontFamily="Mansalva"
             fill="white"
           />
@@ -264,6 +289,23 @@ const App = () => {
 
       {revealed && <button className="next" onClick={nextMessage}>→</button>}
     </div>
+
+    <Stage width={bgSize.width} height={bgSize.height} style={{ position: "fixed", top: 0, left: 0, zIndex: -1 }}>
+      <Layer ref={fireflyRef}>
+        {Array.from({ length: FIREFLIES_NUM }).map((_, i) => (
+          <Circle 
+            key={i}
+            ref={(node) => (fireflyNodes.current[i] = node)}
+            radius={2.5}
+            fill="#FDB813"
+            shadowColor="#ffed7b"
+            shadowBlur={4}
+            shadowOpacity={2}
+            />
+
+        ))}
+      </Layer>
+    </Stage>
     </>
     )}
     </>
