@@ -1,6 +1,8 @@
 import React from "react";
 import "./App.css";
-import { Stage, Layer, Text} from "react-konva";
+import { Stage, Layer, Text, Line} from "react-konva";
+import {Image as KonvaImage} from "react-konva"
+import useImage from "use-image";
 import * as Tone from "tone";
 
 
@@ -51,6 +53,7 @@ const App = () => {
   const isDrawing = React.useRef(false);
   const coatLayer = React.useRef(null);
   const drawTimeoutRef = React.useRef(null);
+  const [lines, setLines] = React.useState([]);
  
 
   const noiseRef = React.useRef(null);
@@ -118,6 +121,7 @@ const App = () => {
     }
 
     isDrawing.current = true;
+    setLines((prev) => [...prev, [pos.x, pos.y]]);
     const pos = e.target.getStage().getPointerPosition();
   
     if (!pos) return;
@@ -134,9 +138,21 @@ const App = () => {
     if (!isDrawing.current) return;
     const pos = e.target.getStage().getPointerPosition();
     if (!pos) return;
+
+      setLines((prev) => {
+      const newLines = [...prev];
+      newLines[newLines.length - 1] = newLines[newLines.length - 1].concat([
+        pos.x,
+        pos.y,
+      ]);
+      return newLines;
+    });
+
     const freq = 300 + Math.random() * 800;
     filterRef.current.frequency.rampTo(freq, 0.03);
     noiseRef.current.volume.rampTo(-30, 0.3);
+
+    
   };
 
   const handleMouseUp = () => {
@@ -148,9 +164,24 @@ const App = () => {
 
   const nextMessage = () => {
     setRevealed(false);
+    setLines([]);
     setMsgNumber((i) => (i + 1) % selectedMessages.length);
+  
   };
 
+
+  const [foilImg] = useImage("/foil.jpg");
+
+  const photoCrop = (imgW, imgH, boxW, boxH) => {
+    const scale = Math.max(boxW / imgW, boxH / imgH);
+
+    return {
+      width: imgW * scale,
+      height: imgH * scale,
+      x: (boxW - imgW * scale) / 2,
+      y: (boxH - imgH * scale) / 2,
+    };
+  };
 
   return (
     <>
@@ -177,6 +208,7 @@ const App = () => {
           setSelectedMessages(messageSets[e.target.value]);
           setMsgNumber(0);
           setRevealed(false);
+          setLines([])
         }}
         >
           {Object.keys(messageSets).map((name) => (
@@ -199,17 +231,36 @@ const App = () => {
           <Text
             text={selectedMessages[msgNumber]}
             x={0}
-            y={40}
+            y={0}
             width={width}
+            height={height}
             align="center"
+            verticalAlign="middle"
             fontSize={26}
             fontFamily="Mansalva"
             fill="white"
-            top="-50px"
           />
         </Layer>
 
-   </ Stage>
+        <Layer ref={coatLayer}>
+          {foilImg && (() => {
+            const fit = photoCrop(foilImg.width, foilImg.height, width, height);
+            return <KonvaImage image={foilImg} x={fit.x} y={fit.y} width={fit.width} height={fit.height} />
+          })()}
+          {lines.map((points, i) => (
+          <Line
+            key={i}
+            points={points}
+            stroke="white"
+            strokeWidth={15}
+            lineCap="round"
+            lineJoin="round"
+            globalCompositeOperation="destination-out"
+            />
+          ))}
+        </Layer>
+
+   </Stage>
 
       {revealed && <button className="next" onClick={nextMessage}>→</button>}
     </div>
