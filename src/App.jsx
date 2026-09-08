@@ -219,7 +219,7 @@ React.useEffect(() => {
         <p className="subtitle">scribble, keep scribblin.</p>
         <button className="start" onClick={() => setStarted(true)}>start game</button>
         <div className="instructions"></div>
-        <p className="extraMessage">if you want to add your own messages, check out the repo and readme, it's actually simple</p>
+        <p className="extraMessage">if you want to add your own messages, check out the <a href="https://github.com/somebodyouknow66/scriblinlife">repo and readme</a>, it's actually simple</p>
       </div>
     ) : (
  
@@ -251,6 +251,10 @@ React.useEffect(() => {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onTouchStart={handleMouseDown}
+        onTouchMove={handleMouseMove}
+        onTouchEnd={handleMouseUp}
+
       >
         <Layer>
           <Text
@@ -288,7 +292,7 @@ React.useEffect(() => {
    </Stage>
 
       {revealed && <button className="next" onClick={nextMessage}>→</button>}
-    </div>
+
 
     <Stage width={bgSize.width} height={bgSize.height} style={{ position: "fixed", top: 0, left: 0, zIndex: -1 }}>
       <Layer ref={fireflyRef}>
@@ -306,6 +310,7 @@ React.useEffect(() => {
         ))}
       </Layer>
     </Stage>
+        </div>
     </>
     )}
     </>
