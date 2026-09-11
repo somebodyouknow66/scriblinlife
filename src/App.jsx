@@ -49,7 +49,7 @@ const App = () => {
   const [msgNumber, setMsgNumber] = React.useState(0);
   const [selectedMessages, setSelectedMessages] = React.useState(ogScriblinLifeMessages);
   const [selectedSetName, setSelectedSetName] = React.useState("ogScriblinLifeMessages by somebodyouknow");
-
+  const [theme, setTheme] = React.useState("depressing");
 
   const isDrawing = React.useRef(false);
   const coatLayer = React.useRef(null);
@@ -134,7 +134,14 @@ React.useEffect(() => {
 }, [bgSize]);
 
 
+// theme 
+
+React.useEffect(() => {
+  document.body.dataset.theme = theme;
+}, [theme]);
+
   const handleMouseDown = async (e) => {
+     const pos = e.target.getStage().getPointerPosition();
     if (!soundStarted.current) {
       await Tone.start();
       await Tone.loaded();
@@ -147,7 +154,7 @@ React.useEffect(() => {
 
     isDrawing.current = true;
     setLines((prev) => [...prev, [pos.x, pos.y]]);
-    const pos = e.target.getStage().getPointerPosition();
+   
   
     if (!pos) return;
 
@@ -265,11 +272,13 @@ React.useEffect(() => {
             height={height}
             align="center"
             verticalAlign="middle"
-            fontSize={34}
+            fontSize={30}
             fontFamily="Mansalva"
             fill="white"
           />
         </Layer>
+
+        
 
         <Layer ref={coatLayer}>
           {foilImg && (() => {
@@ -289,11 +298,18 @@ React.useEffect(() => {
           ))}
         </Layer>
 
+     
+
    </Stage>
 
       {revealed && <button className="next" onClick={nextMessage}>→</button>}
+    <button onClick={() => setTheme(theme === "depressing" ? "chill" : "depressing")} className="mode">
+          switch to  mode
+        </button>
+          
+          <div className={`wave-wipe ${theme}`} key={theme}></div>
 
-
+  { theme === "depressing" && (
     <Stage width={bgSize.width} height={bgSize.height} style={{ position: "fixed", top: 0, left: 0, zIndex: -1 }}>
       <Layer ref={fireflyRef}>
         {Array.from({ length: FIREFLIES_NUM }).map((_, i) => (
@@ -310,6 +326,11 @@ React.useEffect(() => {
         ))}
       </Layer>
     </Stage>
+  )}
+  {theme === "chill" && (
+    <h1>trying....</h1>
+
+  )}
         </div>
     </>
     )}
