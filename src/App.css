@@ -4,7 +4,7 @@
   font-family: "Mansalva", cursive;
   margin: 0;
   padding: 0;
-  color: white;
+ 
 }
 
 
@@ -13,11 +13,13 @@ body{
   background-color: rgb(27, 35, 63);
   transition: background-color 0.4s ease-in-out; 
   overflow: hidden;
+  color:aliceblue
 }
 
 
 body[data-theme="depressing"] {
   background-color: black;
+  color:aliceblue
 }
 
 body[data-theme="chill"] {
@@ -63,6 +65,7 @@ body[data-theme="chill"] {
     font-size: 20px;
     border-radius: 16px;
     background-color: black;
+     color: white;
 }
 
 select {

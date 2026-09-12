@@ -257,6 +257,7 @@ React.useEffect(() => {
     ) : (
  
       <>
+      
       <audio ref={musicRef} src="/Relent.mp3" loop />
 
       <select 
@@ -289,6 +290,7 @@ React.useEffect(() => {
         onTouchEnd={handleMouseUp}
 
       >
+        { theme === "depressing" && (
         <Layer>
           <Text
             text={selectedMessages[msgNumber]}
@@ -301,8 +303,26 @@ React.useEffect(() => {
             fontSize={30}
             fontFamily="Mansalva"
             fill="white"
-          />
+          /> 
         </Layer>
+        )} 
+          { theme === "chill" && (
+        <Layer>
+          <Text
+            text={selectedMessages[msgNumber]}
+            x={0}
+            y={0}
+            width={width}
+            height={height}
+            align="center"
+            verticalAlign="middle"
+            fontSize={30}
+            fontFamily="Mansalva"
+            fill="black"
+          /> 
+        </Layer>
+        )} 
+
 
         
 
