@@ -144,13 +144,13 @@ React.useEffect(() => {
 React.useEffect(() => {
   starsNodes.current.forEach((node, i) => {
     if (!node) return;
-    node.y(bgSize.height + (i * 40) % bgSize.height);
+    node.y(bgSize.height + (i * 60) % bgSize.height);
     node.x(Math.random() * bgSize.width);
   });
   const animation = new Konva.Animation((frame) => {
     starsNodes.current.forEach((node) => {
       if (!node) return;
-      let y = node.y() - 0.5;
+      let y = node.y() - 3;
       if (y < -10) y = bgSize.height + 10;
       node.y(y);
     });
@@ -363,8 +363,8 @@ React.useEffect(() => {
             numPoints={5}
             innerRadius={7}
             outerRadius={12}
-            fill="#FDB813"
-            shadowColor="#ffed7b"
+            fill="#f2bfff"
+            shadowColor="#e288fb"
             shadowBlur={4}
             shadowOpacity={0.8}
             />
