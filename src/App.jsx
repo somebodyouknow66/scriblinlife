@@ -164,7 +164,12 @@ React.useEffect(() => {
 
 React.useEffect(() => {
   document.body.dataset.theme = theme;
+  if (!musicRef.current || !soundStarted.current) return;
+  musicRef.current.load();
+  musicRef.current.play();
 }, [theme]);
+
+
 
   const handleMouseDown = async (e) => {
      const pos = e.target.getStage().getPointerPosition();
@@ -173,7 +178,7 @@ React.useEffect(() => {
       await Tone.loaded();
       noiseRef.current.start();
       musicRef.current.play();
-      musicRef.current.volume = 0.5;
+      musicRef.current.volume = 0.8;
       soundStarted.current = true;
 
     }
@@ -241,6 +246,19 @@ React.useEffect(() => {
     };
   };
 
+  const themeSwitch = async () => {
+    const music = musicRef.current;
+
+    if (music) {
+      music.pause();
+      music.currentTime = 0;
+    }
+
+    setTheme((currentTheme) =>  
+      currentTheme === "depressing" ? "chill" : "depressing"
+    );
+  };
+
   return (
     <>
 
@@ -258,7 +276,13 @@ React.useEffect(() => {
  
       <>
       
-      <audio ref={musicRef} src="/Relent.mp3" loop />
+      <audio 
+      ref={musicRef} 
+      src={theme == "depressing" ? "/Relent.mp3" : "/cloud-dancer.mp3"} 
+      loop 
+      />
+   
+     
 
       <select 
         value={selectedSetName} 
@@ -349,7 +373,7 @@ React.useEffect(() => {
    </Stage>
 
       {revealed && <button className="next" onClick={nextMessage}>→</button>}
-    <button onClick={() => setTheme(theme === "depressing" ? "chill" : "depressing")} className="mode">
+    <button onClick={themeSwitch} className="mode">
           switch to  mode
         </button>
           
