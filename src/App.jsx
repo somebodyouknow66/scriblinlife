@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { Stage, Layer, Text, Line, Circle} from "react-konva";
+import { Stage, Layer, Text, Line, Circle, Star} from "react-konva";
 import {Image as KonvaImage} from "react-konva"
 import Konva from "konva"
 import useImage from "use-image";
@@ -67,6 +67,11 @@ const App = () => {
   const fireflyRef = React.useRef(null);
   const fireflyNodes = React.useRef([]);
 
+
+  const STARS_NUM = 25;
+  const starsRef = React.useRef(null);
+  const starsNodes = React.useRef([]);
+
   const [bgSize, setBgSize] = React.useState({ width: window.innerWidth, height: window.innerHeight})
 
   const checkShown = () => {
@@ -131,7 +136,28 @@ React.useEffect(() => {
   }, fireflyRef.current);
   animation.start();
   return () => animation.stop();
-}, [bgSize]);
+}, [bgSize, theme]);
+
+
+// starts animation
+
+React.useEffect(() => {
+  starsNodes.current.forEach((node, i) => {
+    if (!node) return;
+    node.y(bgSize.height + (i * 40) % bgSize.height);
+    node.x(Math.random() * bgSize.width);
+  });
+  const animation = new Konva.Animation((frame) => {
+    starsNodes.current.forEach((node) => {
+      if (!node) return;
+      let y = node.y() - 0.5;
+      if (y < -10) y = bgSize.height + 10;
+      node.y(y);
+    });
+  }, starsRef.current);
+  animation.start();
+  return () => animation.stop();
+}, [bgSize, theme]);
 
 
 // theme 
@@ -328,7 +354,24 @@ React.useEffect(() => {
     </Stage>
   )}
   {theme === "chill" && (
-    <h1>trying....</h1>
+    <Stage width={bgSize.width} height={bgSize.height} style={{ position: "fixed", top: 0, left: 0, zIndex: -1 }}>
+      <Layer ref={starsRef}>
+        {Array.from({ length: STARS_NUM }).map((_, i) => (
+          <Star
+            key={i}
+            ref={(node) => (starsNodes.current[i] = node)}
+            numPoints={5}
+            innerRadius={7}
+            outerRadius={12}
+            fill="#FDB813"
+            shadowColor="#ffed7b"
+            shadowBlur={4}
+            shadowOpacity={0.8}
+            />
+
+        ))}
+      </Layer>
+    </Stage>
 
   )}
         </div>
